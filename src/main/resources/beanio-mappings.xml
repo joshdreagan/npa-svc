@@ -1,0 +1,17 @@
+<beanio xmlns="http://www.beanio.org/2012/03">
+  <stream name="npaCsvFile" format="csv">
+    <parser>
+      <property name="whitespaceAllowed" value="true"/>
+    </parser>
+    <group name="npaCsvHolder" class="map">
+      <record name="header" class="map" minOccurs="1" maxOccurs="1">
+        <field name="codeColumnName" rid="true" literal="NPA"/>
+        <field name="stateColumnName" rid="true" literal="State"/>
+      </record>  
+      <record name="entries" class="map" collection="list" minOccurs="0" maxOccurs="unbounded">
+        <field name="code" required="true" regex="\d{3}"/>
+        <field name="state" required="true" regex="[a-zA-Z]{2}\s?"/>
+      </record>
+    </group>
+  </stream>
+</beanio>
