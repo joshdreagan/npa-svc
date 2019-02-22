@@ -70,14 +70,14 @@ public class CamelConfiguration extends RouteBuilder {
     ;
     
     from("direct:fetchNpasByState")
-      .log(LoggingLevel.DEBUG, log, "Fetching NPAs for state: ${header.state.toUpperCase()}")
+      .log(LoggingLevel.DEBUG, log, "Fetching NPAs for state: [${header.state.toUpperCase()}]")
       .to("sql:SELECT CODE FROM NPA WHERE STATE=:#${header.state.toUpperCase()}")
       .transform().groovy("['codes': request.body*.get('CODE')]")
       .marshal().json(JsonLibrary.Jackson)
     ;
     
     from("direct:fetchNpasByCode")
-      .log(LoggingLevel.DEBUG, log, "Fetching NPAs for area code: ${header.code}")
+      .log(LoggingLevel.DEBUG, log, "Fetching NPAs for area code: [${header.code}]")
       .to("sql:SELECT STATE FROM NPA WHERE CODE=:#${header.code}?outputType=SelectOne")
       .transform().groovy("['state': request.body?.toUpperCase()]")
       .marshal().json(JsonLibrary.Jackson)
@@ -86,6 +86,7 @@ public class CamelConfiguration extends RouteBuilder {
     from("direct:csvDataUpload")
       .onException(Exception.class)
         .handled(true)
+        .log(LoggingLevel.DEBUG, log, "Error inserting record for state=[${body['state']}], code=[${body['code']}], error=[${exception}]")
         .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
         .setBody(simple("Not OK\n${exception}"))
@@ -96,6 +97,7 @@ public class CamelConfiguration extends RouteBuilder {
       .unmarshal().beanio("/beanio-mappings.xml", "npaCsvFile", "UTF-8")
       .log(LoggingLevel.DEBUG, log, "Inserting [${body[0].get('entries').size()}] records...")
       .split(simple("${body[0].get('entries')}"))
+        .parallelProcessing()
         .to("direct:insertEntryIgnoringDuplicates")
       .end()
       .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
