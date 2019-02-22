@@ -86,7 +86,7 @@ public class CamelConfiguration extends RouteBuilder {
     from("direct:csvDataUpload")
       .onException(Exception.class)
         .handled(true)
-        .log(LoggingLevel.DEBUG, log, "Error inserting record for state=[${body['state']}], code=[${body['code']}], error=[${exception}]")
+        .log(LoggingLevel.DEBUG, log, "Error inserting record for state=[${body?.get('state')}], code=[${body?.get('code')}], error=[${exception}]")
         .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
         .setBody(simple("Not OK\n${exception}"))
