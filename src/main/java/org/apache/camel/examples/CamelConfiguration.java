@@ -72,6 +72,11 @@ public class CamelConfiguration extends RouteBuilder {
     from("direct:fetchNpasByState")
       .log(LoggingLevel.DEBUG, log, "Fetching NPAs for state: [${header.state.toUpperCase()}]")
       .to("sql:SELECT CODE FROM NPA WHERE STATE=:#${header.state.toUpperCase()}")
+      .filter(simple("${header.CamelSqlRowCount} <= 0"))
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(404))
+        .setBody(constant(null))
+        .stop()
+      .end()
       .transform().groovy("['codes': request.body*.get('CODE')]")
       .marshal().json(JsonLibrary.Jackson)
     ;
@@ -79,6 +84,11 @@ public class CamelConfiguration extends RouteBuilder {
     from("direct:fetchNpasByCode")
       .log(LoggingLevel.DEBUG, log, "Fetching NPAs for area code: [${header.code}]")
       .to("sql:SELECT STATE FROM NPA WHERE CODE=:#${header.code}?outputType=SelectOne")
+      .filter(simple("${header.CamelSqlRowCount} <= 0"))
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(404))
+        .setBody(constant(null))
+        .stop()
+      .end()
       .transform().groovy("['state': request.body?.toUpperCase()]")
       .marshal().json(JsonLibrary.Jackson)
     ;
