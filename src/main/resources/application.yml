@@ -13,7 +13,7 @@ endpoints:
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/example?autoReconnect=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/example?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: Abcd1234
     schema: classpath:sql/schema.sql

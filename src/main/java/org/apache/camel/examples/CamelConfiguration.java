@@ -17,8 +17,10 @@
 package org.apache.camel.examples;
 
 import javax.sql.DataSource;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.sql.SqlComponent;
 import org.apache.camel.model.dataformat.JsonLibrary;
